@@ -5,27 +5,25 @@ const mongoose = require("mongoose");
 var path = require("path");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
-const MongoClient = require("mongodb").MongoClient;
 var MongoStore = require("connect-mongo")(session);
 const bodyParser = require("body-parser");
-var jwt = require("jsonwebtoken");
-const config = require("./config/config.json");
 require("./models");
 
 var apiRouter = require("./routes/api");
 
 var app = express();
 
-// view engine setup
 app.use(logger("dev"));
-app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
+app.use(express.static(path.join(__dirname, "public")));
+
 app.use(
     session({
         store: new MongoStore({ mongooseConnection: mongoose.connection }),
-        secret: "secret",
-        key: "key",
+        secret: "key-secret",
+        key: "session-key",
         cookie: {
             path: "/",
             httpOnly: true,
@@ -37,7 +35,6 @@ app.use(
         rolling: true
     })
 );
-app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use("/api", apiRouter);
 app.use("*", (req, res) => {
