@@ -25,7 +25,7 @@ const generateRefreshToken = () => {
 
     return {
         id: payload.id,
-        tokes: jwt.sign(payload, secret, options)
+        token: jwt.sign(payload, secret, options)
     };
 };
 

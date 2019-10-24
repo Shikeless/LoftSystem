@@ -10,6 +10,7 @@ const bodyParser = require("body-parser");
 require("./models");
 
 var apiRouter = require("./routes/api");
+var chatRouter = require("./routes/chat");
 
 var app = express();
 
@@ -37,6 +38,7 @@ app.use(
 );
 
 app.use("/api", apiRouter);
+app.use("/chat", chatRouter);
 app.use("*", (req, res) => {
     res.sendFile(path.join(__dirname, "public/index.html"));
 });
