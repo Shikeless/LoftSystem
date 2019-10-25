@@ -121,10 +121,10 @@ router.post("/registration", function(req, res, next) {
 });
 
 router.post("/refresh-token", function(req, res, next) {
-    const { refreshToken } = req.body;
+    const refToken = req.headers["authorization"];
     let payload;
     try {
-        payload = jwt.verify(refreshToken, process.env.SECRET);
+        payload = jwt.verify(refToken, process.env.SECRET);
         if (payload.type !== "refresh") {
             res.status(400).json({ message: "Invalid token" });
             return;

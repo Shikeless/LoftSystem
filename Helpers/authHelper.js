@@ -9,7 +9,8 @@ const generateAccessToken = userId => {
         userId,
         type: "access"
     };
-    const options = { expiresIn: process.env.ACS_TKN_EXPIRESIN };
+    const options = { expiresIn: +process.env.ACS_TKN_EXPIRESIN };
+    console.log(options);
 
     return jwt.sign(payload, process.env.SECRET, options);
 };
@@ -19,7 +20,8 @@ const generateRefreshToken = () => {
         id: uuid(),
         type: "refresh"
     };
-    const options = { expiresIn: process.env.REF_TKN_EXPIRESIN };
+    const options = { expiresIn: +process.env.REF_TKN_EXPIRESIN };
+    console.log(options);
 
     return {
         id: payload.id,
