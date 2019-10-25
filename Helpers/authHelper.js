@@ -1,5 +1,3 @@
-const { tokens } = require("../config/config.json").jwt;
-const { secret } = require("../config/config.json");
 const jwt = require("jsonwebtoken");
 const uuid = require("uuid");
 const mongoose = require("mongoose");
