@@ -46,6 +46,14 @@ const upload = multer({
     }
 });
 
+function getAllNews(res) {
+    News.find({}, (err, news) => {
+        let items = JSON.parse(JSON.stringify(news));
+        items.forEach(item => (item.id = item._id));
+        res.json(items);
+    });
+}
+
 router.post("/login", function(req, res, next) {
     const { username, password } = req.body;
     User.findOne({ username })
@@ -254,81 +262,46 @@ router.patch("/users/:id/permission", checkToken, function(req, res, next) {
         });
 });
 
-function returnAllNews(res) {}
-
 router.get("/news", checkToken, function(req, res, next) {
-    News.find({}, (err, news) => {
-        let items = JSON.parse(JSON.stringify(news));
-        items.forEach(item => (item.id = item._id));
-        res.json(items);
+    getAllNews(res);
+});
+
+router.delete("/news/:id", checkToken, async function(req, res, next) {
+    News.findOneAndDelete({ _id: req.params.id }, () => {
+        getAllNews(res);
     });
 });
 
-// router.delete("/news/:id", checkToken, function(req, res, next) {
-//     News.findOneAndRemove(req.params.id, err => {
-//         if (err) {
-//             return res.status(400).json({ message: err.message });
-//         } else {
-//             return returnAllNews(res);
-//         }
-//     });
-// });
+router.patch("/news/:id", checkToken, async function(req, res, next) {
+    News.findOneAndUpdate({ _id: req.params.id }, req.body, () => {
+        getAllNews(res);
+    });
+});
 
-// // router.patch("/news/:id", checkToken, function(req, res, next) {
-// //     const { text, title } = req.body;
-// //     News.updateOne({ _id: req.params.id }, { text, title })
-// //         .then(results => {
-// //             if (results) {
-// //                 News.getAllNews()
-// //                     .then(news => res.status(200).json(news))
-// //                     .catch(e =>
-// //                         res
-// //                             .status(400)
-// //                             .json({ error: true, message: e.message })
-// //                     );
-// //             } else {
-// //                 return res
-// //                     .status(404)
-// //                     .json({ error: true, message: "News not found" });
-// //             }
-// //         })
-// //         .catch(e => {
-// //             return res.status(400).json({ error: true, message: e.message });
-// //         });
-// // });
-
-router.post("/news", checkToken, function(req, res, next) {
-    console.log(Date(Date.now().toString()));
-    const { title, text } = req.body;
-    User.findOne({ _id: req.user.userId })
-        .then(user => {
-            const id = user._id;
-            const { firstName, image, middleName, surName, username } = user;
-            const news = new News({
-                text,
-                title,
-                user: {
-                    firstName,
-                    id,
-                    image,
-                    middleName,
-                    surName,
-                    username
-                }
-            });
-            news.save()
-                .then(result => {
-                    res.status(201).json({
-                        message: "User created"
-                    });
-                })
-                .catch(err => {
-                    res.status(500).json({
-                        error: err
-                    });
-                });
-        })
-        .catch(err => res.status(500).json({ message: err.message }));
+router.post("/news", checkToken, async function(req, res, next) {
+    const { text, title } = req.body;
+    try {
+        const user = await User.findOne({ _id: req.user.userId });
+        const article = new News({
+            created_at: Date.now(),
+            text: text,
+            title: title,
+            user: {
+                firstName: user.firstName,
+                id: user._id,
+                image: user.image,
+                middleName: user.middleName,
+                surName: user.surName,
+                username: user.username
+            }
+        });
+        article.save().then(article => {
+            getAllNews(res);
+        });
+    } catch (e) {
+        console.log(e);
+        res.status(400).json({ message: "News Update error" });
+    }
 });
 
 module.exports = router;

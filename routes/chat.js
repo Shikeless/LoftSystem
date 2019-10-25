@@ -15,7 +15,7 @@ module.exports = io => {
                 senderId: data.senderId,
                 text: `Me: ${data.text}`
             });
-            io.to(data.roomId).emit("message:add", {
+            socket.broadcast.to(data.roomId).json.emit("message:add", {
                 senderId: socket.id,
                 roomId: data.roomId,
                 text: `${connections[socket.id].username}: ${data.text}`
