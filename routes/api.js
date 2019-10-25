@@ -21,8 +21,10 @@ const updateTokens = userId => {
         .then(() => ({
             accessToken,
             refreshToken: refreshToken.token,
-            accessTokenExpiredAt: Date.now() + tokens.access.expiresIn * 1000,
-            refreshTokenExpiredAt: Date.now() + tokens.refresh.expiresIn * 1000
+            accessTokenExpiredAt:
+                Date.now() + procecess.env.ACS_TKN_EXPIRESIN * 1000,
+            refreshTokenExpiredAt:
+                Date.now() + procecess.env.REF_TKN_EXPIRESIN * 1000
         }));
 };
 
@@ -124,7 +126,7 @@ router.post("/refresh-token", function(req, res, next) {
     const { refreshToken } = req.body;
     let payload;
     try {
-        payload = jwt.verify(refreshToken, secret);
+        payload = jwt.verify(refreshToken, process.env.SECRET);
         if (payload.type !== "refresh") {
             res.status(400).json({ message: "Invalid token" });
             return;

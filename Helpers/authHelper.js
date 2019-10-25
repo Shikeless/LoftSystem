@@ -9,23 +9,23 @@ const Token = mongoose.model("token");
 const generateAccessToken = userId => {
     const payload = {
         userId,
-        type: tokens.access.type
+        type: "access"
     };
-    const options = { expiresIn: tokens.access.expiresIn };
+    const options = { expiresIn: process.env.ACS_TKN_EXPIRESIN };
 
-    return jwt.sign(payload, secret, options);
+    return jwt.sign(payload, process.env.SECRET, options);
 };
 
 const generateRefreshToken = () => {
     const payload = {
         id: uuid(),
-        type: tokens.refresh.type
+        type: "refresh"
     };
-    const options = { expiresIn: tokens.refresh.expiresIn };
+    const options = { expiresIn: process.env.REF_TKN_EXPIRESIN };
 
     return {
         id: payload.id,
-        token: jwt.sign(payload, secret, options)
+        token: jwt.sign(payload, process.env.SECRET, options)
     };
 };
 

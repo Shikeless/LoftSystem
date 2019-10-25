@@ -7,7 +7,7 @@ require("./news");
 
 mongoose.Promise = global.Promise;
 
-mongoose.connect(config.dbUri, {
+mongoose.connect(process.env.DBURI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true,

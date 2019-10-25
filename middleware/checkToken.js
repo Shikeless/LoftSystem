@@ -11,7 +11,7 @@ module.exports = (req, res, next) => {
 
     const token = authHeader.replace("Bearer ", "");
     try {
-        const decoded = jwt.verify(token, secret);
+        const decoded = jwt.verify(token, process.env.SECRET);
         if (decoded.type !== "access") {
             res.status(401).json({
                 message: "Invalid token!"
