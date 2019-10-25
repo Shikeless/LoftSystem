@@ -210,7 +210,10 @@ router.patch("/profile", checkToken, upload.single("avatar"), async function(
     await user
         .save()
         .then(result => {
+            result = JSON.parse(JSON.stringify(result));
             result.id = result._id;
+            delete result._id;
+            console.log(result);
             res.json(result);
         })
         .catch(err => {
