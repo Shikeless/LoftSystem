@@ -151,8 +151,8 @@ router.post("/refresh-token", function(req, res, next) {
         .catch(err => res.status(400).json({ message: err.message }));
 });
 
-router.get("/profile", checkToken, function(req, res, next) {
-    const user = User.findById(req.user.userId);
+router.get("/profile", checkToken, async function(req, res, next) {
+    const user = await User.findById(req.user.userId);
     if (!user) {
         return res.status(401).json({
             message: "Seems there are no any user"
@@ -174,7 +174,7 @@ router.get("/profile", checkToken, function(req, res, next) {
     }
 });
 
-router.patch("/profile", checkToken, upload.single("avatar"), function(
+router.patch("/profile", checkToken, upload.single("avatar"), async function(
     req,
     res,
     next
@@ -186,41 +186,38 @@ router.patch("/profile", checkToken, upload.single("avatar"), function(
         oldPassword,
         newPassword
     } = req.body;
-    User.findOne({ _id: req.user.userId }).then(user => {
-        if (newPassword) {
-            if (user.validPassword(oldPassword)) {
-                user.setPassword(newPassword);
-            } else {
-                return res
-                    .status(401)
-                    .json({ message: "Incorect old password" });
-            }
+    const user = await User.findOne({ _id: req.user.userId });
+    if (newPassword) {
+        if (user.validPassword(oldPassword)) {
+            user.setPassword(newPassword);
+        } else {
+            return res.status(401).json({ message: "Incorect old password" });
         }
-        if (firstName) {
-            user.set({ firstName });
-        }
-        if (middleName) {
-            user.set({ middleName });
-        }
-        if (surName) {
-            user.set({ surName });
-        }
-        if (req.file) {
-            const image = `/uploads/${req.file.filename}`;
-            user.set({ image: image });
-        }
-        user.save()
-            .then(result => {
-                res.status(201).json({
-                    message: "Information updated"
-                });
-            })
-            .catch(err => {
-                res.status(500).json({
-                    error: err
-                });
+    }
+    if (firstName) {
+        user.set({ firstName });
+    }
+    if (middleName) {
+        user.set({ middleName });
+    }
+    if (surName) {
+        user.set({ surName });
+    }
+    if (req.file) {
+        const image = `/uploads/${req.file.filename}`;
+        user.set({ image: image });
+    }
+    await user
+        .save()
+        .then(result => {
+            result.id = result._id;
+            res.json(result);
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
             });
-    });
+        });
 });
 
 router.get("/users", checkToken, function(req, res, next) {
