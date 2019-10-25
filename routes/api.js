@@ -20,9 +20,9 @@ const updateTokens = userId => {
             accessToken,
             refreshToken: refreshToken.token,
             accessTokenExpiredAt:
-                Date.now() + procecess.env.ACS_TKN_EXPIRESIN * 1000,
+                Date.now() + process.env.ACS_TKN_EXPIRESIN * 1000,
             refreshTokenExpiredAt:
-                Date.now() + procecess.env.REF_TKN_EXPIRESIN * 1000
+                Date.now() + process.env.REF_TKN_EXPIRESIN * 1000
         }));
 };
 
