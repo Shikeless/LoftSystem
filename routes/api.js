@@ -54,6 +54,18 @@ function getAllNews(res) {
     });
 }
 
+function serialize(user) {
+    return {
+        firstName: user.firstName || "",
+        id: user._id,
+        image: user.image || "",
+        middleName: user.middleName || "",
+        permission: user.permission,
+        surName: user.surName || "",
+        username: user.username || ""
+    };
+}
+
 router.post("/login", function(req, res, next) {
     const { username, password } = req.body;
     User.findOne({ username })
@@ -65,21 +77,12 @@ router.post("/login", function(req, res, next) {
             if (!user.validPassword(password)) {
                 return res.status(401).json({ message: "Incorect password" });
             } else {
-                return updateTokens(user._id).then(tokens =>
+                return updateTokens(user._id).then(tokens => {
                     res.status(200).json({
-                        firstName: user.firstName,
-                        id: user._id,
-                        image: user.image,
-                        middleName: user.middleName,
-                        permission: user.permission,
-                        surName: user.surName,
-                        username: user.username,
-                        accessToken: tokens.accessToken,
-                        refreshToken: tokens.refreshToken,
-                        accessTokenExpiredAt: tokens.accessTokenExpiredAt,
-                        refreshTokenExpiredAt: tokens.refreshTokenExpiredAt
-                    })
-                );
+                        ...serialize(user),
+                        ...tokens
+                    });
+                });
             }
         })
         .catch(err => res.status(500).json({ message: err.message }));
@@ -158,19 +161,7 @@ router.get("/profile", checkToken, async function(req, res, next) {
             message: "Seems there are no any user"
         });
     } else {
-        res.status(200).json({
-            firstName: user.firstName,
-            id: user._id,
-            image: user.image,
-            middleName: user.middleName,
-            permission: user.permission,
-            surName: user.surName,
-            username: user.username,
-            accessToken: tokens.accessToken,
-            refreshToken: tokens.refreshToken,
-            accessTokenExpiredAt: tokens.accessTokenExpiredAt,
-            refreshTokenExpiredAt: tokens.refreshTokenExpiredAt
-        });
+        res.status(200).json(serialize(user));
     }
 });
 
@@ -210,11 +201,7 @@ router.patch("/profile", checkToken, upload.single("avatar"), async function(
     await user
         .save()
         .then(result => {
-            result = JSON.parse(JSON.stringify(result));
-            result.id = result._id;
-            delete result._id;
-            console.log(result);
-            res.json(result);
+            res.json(serialize(result));
         })
         .catch(err => {
             res.status(500).json({
