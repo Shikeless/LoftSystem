@@ -3,18 +3,16 @@ const config = require("../config/config.json");
 
 require("./token");
 require("./user");
+require("./news");
 
 mongoose.Promise = global.Promise;
 
-mongoose.connect(
-    "mongodb+srv://user:1234@cluster0-syugm.azure.mongodb.net/test?retryWrites=true&w=majority",
-    {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-        useCreateIndex: true,
-        useFindAndModify: false
-    }
-);
+mongoose.connect(config.dbUri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    useCreateIndex: true,
+    useFindAndModify: false
+});
 
 mongoose.connection.on("error", err => {
     console.log("Mongoose connection error: " + err);

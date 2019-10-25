@@ -4,19 +4,20 @@ module.exports = io => {
     io.on("connection", socket => {
         socket.on("users:connect", user => {
             const userData = { username: user.username, id: socket.id };
-            connections[socket.id] = userData;
-            console.log(connections);
+            connections[userData.id] = userData;
             socket.json.emit("users:list", Object.values(connections));
             socket.broadcast.emit("users:add", userData);
         });
 
         socket.on("message:add", data => {
+            console.log(data);
             socket.json.emit("message:add", {
                 senderId: data.senderId,
                 text: `Me: ${data.text}`
             });
-            socket.broadcast.to(data.roomId).json.emit("message:add", {
+            io.to(data.roomId).emit("message:add", {
                 senderId: socket.id,
+                roomId: data.roomId,
                 text: `${connections[socket.id].username}: ${data.text}`
             });
         });
